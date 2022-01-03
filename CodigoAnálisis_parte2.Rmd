@@ -1,0 +1,735 @@
+---
+title: "Código TFM"
+author: "José Fernando Castillo Alba"
+date: "Noviembre/2021"
+output: 
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r echo=TRUE}
+library(rtweet)
+library(dplyr)
+library(tidyr)
+
+```
+
+# Análisis de los DATASET
+
+## Cargar los DATASET
+```{r echo=TRUE}
+df_Provoste <- read.csv('tweetsProvoste.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Sichel <- read.csv('tweetsSichel.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Parisi <- read.csv('tweetsParisi.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Kast <- read.csv('tweetsKast.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Enriquez <- read.csv('tweetsEnriquez.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Boric <- read.csv('tweetsBoric.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Artes <- read.csv('tweetsArtes.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Hashtag <- read.csv('tweetsHashtag.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+
+#str(df_Provoste)
+#users_data(df_Provoste) %>% head()
+#head(df_Provoste$text, 5)
+```
+
+
+## Clasificación en Tweets y RTweets
+```{r echo=TRUE}
+library(ggplot2)
+library(gridExtra)
+
+#Función para convertir a factor la variable is_retweet
+conv_factor <- function(datos) {
+resultado <- factor(datos$is_retweet,labels=c("Tweets","RTweets")) #Convertir a factor
+return(resultado)
+}
+
+clasificacion1 <- conv_factor(df_Provoste)
+clasificacion2 <- conv_factor(df_Sichel)
+clasificacion3 <- conv_factor(df_Parisi)
+clasificacion4 <- conv_factor(df_Kast)
+clasificacion5 <- conv_factor(df_Enriquez)
+clasificacion6 <- conv_factor(df_Boric)
+clasificacion7 <- conv_factor(df_Artes)
+clasificacion8 <- conv_factor(df_Hashtag)
+
+
+g1 <- ggplot(df_Provoste,aes(x=clasificacion1,fill=clasificacion1))+geom_bar()+ labs(title="Yasna Provoste", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=-0, size=3) +
+    theme(legend.position = "none")
+
+g2 <- ggplot(df_Sichel,aes(x=clasificacion2,fill=clasificacion2))+geom_bar()+ labs(title="Sebastián Sichel", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=-0, size=3)+
+    theme(legend.position = "none")
+
+g3 <- ggplot(df_Parisi,aes(x=clasificacion3,fill=clasificacion3))+geom_bar()+ labs(title="Franco Parisi", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=-0, size=3)+
+    theme(legend.position = "none") 
+
+g4 <- ggplot(df_Kast,aes(x=clasificacion4,fill=clasificacion4))+geom_bar()+ labs(title="José Antonio Kast", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=-0, size=3)+
+    theme(legend.position = "none") 
+
+g5 <- ggplot(df_Enriquez,aes(x=clasificacion5,fill=clasificacion5))+geom_bar()+ labs(title="Marco Enríquez-Ominami", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=-0, size=3)+
+    theme(legend.position = "none")
+
+g6 <- ggplot(df_Boric,aes(x=clasificacion6,fill=clasificacion6))+geom_bar()+ labs(title="Gabriel Boric", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=-0, size=3)+
+    theme(legend.position = "none") 
+
+g7 <- ggplot(df_Artes,aes(x=clasificacion7,fill=clasificacion7))+geom_bar()+ labs(title="Eduardo Artés", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=-0, size=3)+
+    theme(legend.position = "none") 
+
+g8 <- ggplot(df_Hashtag,aes(x=clasificacion8,fill=clasificacion8))+geom_bar()+ labs(title="#EleccionesChile2021", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=-0, size=3)+
+    theme(legend.position = "none")
+
+grid.arrange(g1,g2,g3,g4,ncol=2)
+grid.arrange(g5,g6,g7,g8,ncol=2)
+
+```
+
+## Evolución temporal de los tweets
+```{r echo=TRUE}
+t1 <- ts_plot(df_Provoste, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "Yasna Provoste") + theme_minimal()
+
+t2 <- ts_plot(df_Sichel, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "Sebastián Sichel") + theme_minimal()
+
+t3 <- ts_plot(df_Parisi, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "Franco Parisi") + theme_minimal()
+
+t4 <- ts_plot(df_Kast, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "José Antonio Kast") + theme_minimal()
+
+t5 <- ts_plot(df_Enriquez, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "Marco Enríquez-Ominami") + theme_minimal()
+
+t6 <- ts_plot(df_Boric, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "Gabriel Boric") + theme_minimal()
+
+t7 <- ts_plot(df_Artes, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "Eduardo Artés") + theme_minimal()
+
+t8 <- ts_plot(df_Hashtag, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "#EleccionesChile2021") + theme_minimal()
+
+grid.arrange(t1,t2,t3,t4,ncol=2)
+grid.arrange(t5,t6,t7,t8,ncol=2)
+```
+
+## Usuario que recibio mas RTweets en un Tweet 
+
+### Mencionando a Yasna Provoste 
+```{r echo=TRUE}
+
+df_Provoste %>% 
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(screen_name, retweet_count) %>%
+    mutate(screen_name = paste0("@", screen_name)) %>%
+    ggplot(aes(x = reorder(screen_name, retweet_count), y = retweet_count, fill = retweet_count)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    geom_text(aes(label = retweet_count, y = retweet_count, x = screen_name),hjust=0, size = 3, color = "black")+
+    coord_flip() +
+    labs(title = "Usuario que recibio mas RTweets en un Tweet", x = NULL, y = "Número de RT")
+```
+
+### Mencionando a Sebastián Sichel
+
+```{r echo=TRUE}
+
+df_Sichel %>% 
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(screen_name, retweet_count) %>%
+    mutate(screen_name = paste0("@", screen_name)) %>%
+    ggplot(aes(x = reorder(screen_name, retweet_count), y = retweet_count, fill = retweet_count)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    geom_text(aes(label = retweet_count, y = retweet_count, x = screen_name),hjust=0, size = 3, color = "black")+
+    coord_flip() +
+    labs(title = "Usuario que recibio mas RTweets en un Tweet", x = NULL, y = "Número de RT")
+
+max(df_Sichel$retweet_count)
+length(grep(3432, df_Sichel$retweet_count))
+```
+
+### Mencionando a Franco Parisi
+```{r echo=TRUE}
+
+df_Parisi %>% 
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(screen_name, retweet_count) %>%
+    mutate(screen_name = paste0("@", screen_name)) %>%
+    ggplot(aes(x = reorder(screen_name, retweet_count), y = retweet_count, fill = retweet_count)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    geom_text(aes(label = retweet_count, y = retweet_count, x = screen_name),hjust=0, size = 3, color = "black")+
+    coord_flip() +
+    labs(title = "Usuario que recibio mas RTweets en un Tweet", x = NULL, y = "Número de RT")
+
+max(df_Parisi$retweet_count)
+length(grep(1435, df_Parisi$retweet_count)) 
+```
+
+### Mencionando a José Antonio Kast
+```{r echo=TRUE}
+
+df_Kast %>% 
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(screen_name, retweet_count) %>%
+    mutate(screen_name = paste0("@", screen_name)) %>%
+    ggplot(aes(x = reorder(screen_name, retweet_count), y = retweet_count, fill = retweet_count)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    geom_text(aes(label = retweet_count, y = retweet_count, x = screen_name),hjust=0, size = 3, color = "black")+
+    coord_flip() +
+    labs(title = "Usuario que recibio mas RTweets en un Tweet", x = NULL, y = "Número de RT")
+
+max(df_Kast$retweet_count)
+length(grep(7198, df_Kast$retweet_count)) 
+```
+
+
+## Usuarios que suma mas RTweets en sus Tweets 
+```{r echo=TRUE}
+
+df_Provoste %>%
+    group_by(screen_name) %>% # Agrupar por screen name
+    summarize(Total_tweets = n(), #Total de tweets 
+    Nro_Rt =  sum(retweet_count))%>% #Total de Rtweets
+    top_n(5,Nro_Rt)%>%
+    arrange(desc(Nro_Rt))%>% # ordenar
+    mutate(screen_name = paste0("@", screen_name))
+
+
+```
+
+## Usuarios mas activos incluye RT
+```{r echo=TRUE}
+
+df_Provoste %>% 
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=0, size = 3, color = "black")+
+        labs(title = "Usuario mas activos incluye RT", x = NULL, y = "Número de Tweets incluye los RT")
+```
+
+## Usuarios mas activos sin incluir el RT
+```{r echo=TRUE}
+
+df_Provoste %>%  
+        filter(is_retweet==F) %>%
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=0, size = 3, color = "black")+
+        labs(title = "Usuario mas activos sin incluir el RT", x = NULL, y = "Número de Tweets sin los RT")
+```
+
+
+# Limpiar Datos
+```{r echo=TRUE}
+library(tm)
+
+clean_data <- function(df) {
+df$text <- gsub("\\<U*[[:punct:]][A-z0-9]*>","", df$text) #Eliminar caracteres
+df$text <- gsub("[A-z]*\\:{1}\\/*[A-z]*\\.[A-z]*\\/*[A-z0-9]*\\s*","", df$text)  #Eliminar links
+df$text <- gsub("\\@[A-z0-9]*","", df$text) #Eliminar menciones "@"
+df$text <- gsub("\\#[A-z]*","", df$text) #Eliminar hashtags
+df$text <- removePunctuation(df$text) #Eliminar signos de puntuación
+df$text <- stripWhitespace(df$text) #Eliminar espacios en blanco
+df$text <- removeNumbers(df$text) #Eliminar números
+return(df$text)
+}
+
+df_Provoste$text <- clean_data(df_Provoste)
+df_Sichel$text <- clean_data(df_Sichel)
+df_Parisi$text <- clean_data(df_Parisi)
+df_Kast$text <- clean_data(df_Kast)
+df_Enriquez$text <- clean_data(df_Enriquez)
+df_Boric$text <- clean_data(df_Boric)
+df_Artes$text <- clean_data(df_Artes)
+df_Hashtag$text <- clean_data(df_Hashtag)
+
+
+```
+
+
+# Nube de palabras y Análisis de Sentimientos
+
+```{r echo=TRUE}
+library(tidytext)
+library(tidyverse)
+library(wordcloud)
+library(wordcloud2)
+library(devtools)
+library(syuzhet)
+
+lexico <- get_sentiment_dictionary("nrc", language="spanish")
+lexico <- lexico %>% select(word,sentiment )
+
+```
+
+## Yasna Provoste
+
+```{r echo=TRUE}
+
+ Provoste_token <- unnest_tokens(tbl=df_Provoste, output="word",input="text",token="words") 
+ Provoste_token <- anti_join(x=Provoste_token,y=tibble(word = tm::stopwords("es")),by="word") 
+     Provoste_token %>% 
+    count(word) %>% 
+    with(wordcloud(words=word, freq=n, max.words = 80, random.order = F, colors=brewer.pal(8,"Dark2"))) 
+
+
+Provoste_sentiment <- get_nrc_sentiment(df_Provoste$text, lang="spanish") 
+
+
+ Provoste_nrc <- Provoste_token %>% inner_join(lexico) 
+
+ Provoste_nrc %>% 
+   filter(sentiment!="negative" & sentiment!="positive") %>% 
+   count(word,sentiment,sort=TRUE) %>% 
+   group_by(sentiment) %>% 
+   top_n(10) %>% 
+   ungroup() %>% 
+   mutate(word=reorder(word,n)) %>% 
+   ggplot(aes(word,n,fill=sentiment))+ 
+   geom_col(show.legend = FALSE) + 
+   geom_text(aes(label=n), hjust= 0) + 
+   facet_wrap(~sentiment,scales = "free_y")+ 
+   coord_flip() + 
+   xlab(NULL)
+
+
+
+ Provoste_nrc %>% 
+   filter(sentiment=="negative" | sentiment=="positive") %>% 
+   count(word,sentiment,sort=TRUE) %>% 
+   group_by(sentiment) %>% 
+   top_n(10) %>% 
+   ungroup() %>% 
+   mutate(word=reorder(word,n)) %>% 
+   ggplot(aes(word,n,fill=sentiment))+ 
+   geom_col(show.legend = FALSE) + 
+   geom_text(aes(label=n), hjust= 0) + 
+   facet_wrap(~sentiment,scales = "free_y")+ 
+   coord_flip() + 
+   xlab(NULL) 
+
+
+ Provoste_nrc %>% 
+         count(sentiment, sort = TRUE) %>% 
+         ggplot(aes(x = sentiment, y = n, fill = sentiment)) + 
+         geom_col() + 
+         theme(legend.position = "none") + 
+         #geom_text(aes(label = n, y = n, x = screen_name),hjust=0, size = 3, color = "black")+
+         labs(x = "Sentimiento", y = "Frecuencia de Palabras") 
+
+
+     Provoste_sentiment %>%
+   summarize_all(sum, na.rm = TRUE) %>%
+   select(negative, positive) %>% 
+   reshape2::melt() %>%
+   ggplot(aes(reorder(variable, -value), value, fill=variable)) +
+   geom_col() +
+   labs(x = "Sentimientos", y = "Frecuencia de Palabras") +
+  theme(legend.position = "none") 
+
+```
+
+## Sebastián Sichel
+
+```{r echo=TRUE}
+Sichel_token <- unnest_tokens(tbl=df_Sichel, output="word",input="text",token="words")
+Sichel_token <- anti_join(x=Sichel_token,y=tibble(word = tm::stopwords("es")),by="word")
+ Sichel_token %>%
+   count(word) %>%
+   with(wordcloud(words=word, freq=n, max.words = 80, random.order = F, colors=brewer.pal(8,"Dark2")))
+
+
+Sichel_nrc <- Sichel_token %>% inner_join(lexico)
+
+Sichel_nrc %>%
+  filter(sentiment!="negative" & sentiment!="positive") %>%
+  count(word,sentiment,sort=TRUE) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label=n), hjust= 0) +
+  facet_wrap(~sentiment,scales = "free_y")+
+  coord_flip() +
+  xlab(NULL)
+
+
+
+Sichel_nrc %>%
+  filter(sentiment=="negative" | sentiment=="positive") %>%
+  count(word,sentiment,sort=TRUE) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label=n), hjust= 0) +
+  facet_wrap(~sentiment,scales = "free_y")+
+  coord_flip() +
+  xlab(NULL)
+
+
+Sichel_nrc %>%
+        count(sentiment, sort = TRUE) %>%
+        ggplot(aes(x = sentiment, y = n, fill = sentiment)) +
+        geom_col() +
+        theme(legend.position = "none") +
+        #geom_text(aes(label = n, y = n, x = screen_name),hjust=0, size = 3, color = "black")+
+        labs(x = "Sentimiento", y = "Frecuencia de Palabras")
+
+```
+
+## Franco Parisi
+```{r echo=TRUE}
+Parisi_token <- unnest_tokens(tbl=df_Parisi, output="word",input="text",token="words")
+Parisi_token <- anti_join(x=Parisi_token,y=tibble(word = tm::stopwords("es")),by="word")
+Parisi_token %>%
+   count(word) %>%
+   with(wordcloud(words=word, freq=n, max.words = 80, random.order = F, colors=brewer.pal(8,"Dark2")))
+
+
+Parisi_nrc <- Parisi_token %>% inner_join(lexico)
+
+Parisi_nrc %>%
+  filter(sentiment!="negative" & sentiment!="positive") %>%
+  count(word,sentiment,sort=TRUE) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label=n), hjust= 0) +
+  facet_wrap(~sentiment,scales = "free_y")+
+  coord_flip() +
+  xlab(NULL)
+
+
+
+Parisi_nrc %>%
+  filter(sentiment=="negative" | sentiment=="positive") %>%
+  count(word,sentiment,sort=TRUE) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label=n), hjust= 0) +
+  facet_wrap(~sentiment,scales = "free_y")+
+  coord_flip() +
+  xlab(NULL)
+
+
+Parisi_nrc %>%
+        count(sentiment, sort = TRUE) %>%
+        ggplot(aes(x = sentiment, y = n, fill = sentiment)) +
+        geom_col() +
+        theme(legend.position = "none") +
+        #geom_text(aes(label = n, y = n, x = screen_name),hjust=0, size = 3, color = "black")+
+        labs(x = "Sentimiento", y = "Frecuencia de Palabras")
+
+
+```
+
+## José Antonio Kast 
+```{r echo=TRUE}
+Kast_token <- unnest_tokens(tbl=df_Kast, output="word",input="text",token="words")
+Kast_token <- anti_join(x=Kast_token,y=tibble(word = tm::stopwords("es")),by="word")
+Kast_token %>%
+   count(word) %>%
+   with(wordcloud(words=word, freq=n, max.words = 80, random.order = F, colors=brewer.pal(8,"Dark2")))
+
+
+
+Kast_nrc <- Kast_token %>% inner_join(lexico)
+
+Kast_nrc %>%
+  filter(sentiment!="negative" & sentiment!="positive") %>%
+  count(word,sentiment,sort=TRUE) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label=n), hjust= 0) +
+  facet_wrap(~sentiment,scales = "free_y")+
+  coord_flip() +
+  xlab(NULL)
+
+
+
+Kast_nrc %>%
+  filter(sentiment=="negative" | sentiment=="positive") %>%
+  count(word,sentiment,sort=TRUE) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label=n), hjust= 0) +
+  facet_wrap(~sentiment,scales = "free_y")+
+  coord_flip() +
+  xlab(NULL)
+
+
+Kast_nrc %>%
+        count(sentiment, sort = TRUE) %>%
+        ggplot(aes(x = sentiment, y = n, fill = sentiment)) +
+        geom_col() +
+        theme(legend.position = "none") +
+        #geom_text(aes(label = n, y = n, x = screen_name),hjust=0, size = 3, color = "black")+
+        labs(x = "Sentimiento", y = "Frecuencia de Palabras")
+
+```
+
+
+## Marco Enríquez-Ominami
+```{r echo=TRUE}
+Enriquez_token <- unnest_tokens(tbl=df_Enriquez, output="word",input="text",token="words")
+ Enriquez_token <- anti_join(x=Enriquez_token,y=tibble(word = tm::stopwords("es")),by="word") 
+ Enriquez_token %>% 
+ count(word) %>% 
+ with(wordcloud(words=word, freq=n, max.words = 80, random.order = F, colors=brewer.pal(8,"Dark2"))) 
+
+
+Enriquez_nrc <- Enriquez_token %>% inner_join(lexico)
+
+Enriquez_nrc %>% 
+   filter(sentiment!="negative" & sentiment!="positive") %>% 
+   count(word,sentiment,sort=TRUE) %>% 
+   group_by(sentiment) %>% 
+   top_n(10) %>% 
+   ungroup() %>% 
+   mutate(word=reorder(word,n)) %>% 
+   ggplot(aes(word,n,fill=sentiment))+ 
+   geom_col(show.legend = FALSE) + 
+   geom_text(aes(label=n), hjust= 0) + 
+   facet_wrap(~sentiment,scales = "free_y")+ 
+   coord_flip() + 
+   xlab(NULL) 
+
+
+
+Enriquez_nrc %>% 
+   filter(sentiment=="negative" | sentiment=="positive") %>% 
+   count(word,sentiment,sort=TRUE) %>% 
+   group_by(sentiment) %>% 
+   top_n(10) %>% 
+   ungroup() %>% 
+   mutate(word=reorder(word,n)) %>% 
+   ggplot(aes(word,n,fill=sentiment))+ 
+   geom_col(show.legend = FALSE) + 
+   geom_text(aes(label=n), hjust= 0) + 
+   facet_wrap(~sentiment,scales = "free_y")+ 
+   coord_flip() + 
+   xlab(NULL) 
+
+
+Enriquez_nrc %>% 
+         count(sentiment, sort = TRUE) %>% 
+         ggplot(aes(x = sentiment, y = n, fill = sentiment)) + 
+         geom_col() + 
+         theme(legend.position = "none") + 
+         geom_text(aes(label = n, y = n, x = screen_name),hjust=0, size = 3, color = "black")+ 
+         labs(x = "Sentimiento", y = "Frecuencia de Palabras") 
+```
+
+## Gabriel Boric
+```{r echo=TRUE}
+Boric_token <- unnest_tokens(tbl=df_Boric, output="word",input="text",token="words")
+Boric_token <- anti_join(x=Boric_token,y=tibble(word = tm::stopwords("es")),by="word")
+Boric_token %>%
+   count(word) %>%
+   with(wordcloud(words=word, freq=n, max.words = 80, random.order = F, colors=brewer.pal(8,"Dark2")))
+
+
+Boric_nrc <- Boric_token %>% inner_join(lexico)
+
+Boric_nrc %>%
+  filter(sentiment!="negative" & sentiment!="positive") %>%
+  count(word,sentiment,sort=TRUE) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label=n), hjust= 0) +
+  facet_wrap(~sentiment,scales = "free_y")+
+  coord_flip() +
+  xlab(NULL)
+
+
+
+Boric_nrc %>%
+  filter(sentiment=="negative" | sentiment=="positive") %>%
+  count(word,sentiment,sort=TRUE) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label=n), hjust= 0) +
+  facet_wrap(~sentiment,scales = "free_y")+
+  coord_flip() +
+  xlab(NULL)
+
+
+Boric_nrc %>%
+        count(sentiment, sort = TRUE) %>%
+        ggplot(aes(x = sentiment, y = n, fill = sentiment)) +
+        geom_col() +
+        theme(legend.position = "none") +
+        #geom_text(aes(label = n, y = n, x = screen_name),hjust=0, size = 3, color = "black")+
+        labs(x = "Sentimiento", y = "Frecuencia de Palabras")
+
+```
+
+
+
+## Eduardo Artés
+```{r echo=TRUE}
+
+
+
+Artes_token <- unnest_tokens(tbl=df_Artes, output="word",input="text",token="words")
+word <- c(tm::stopwords("es"),"q", "hace")
+Artes_token <- anti_join(x=Artes_token,y=tibble(word),by="word")
+Artes_token %>%
+   count(word) %>%
+   with(wordcloud(words=word, freq=n, max.words = 80, random.order = F, colors=brewer.pal(8,"Dark2")))
+
+
+Artes_nrc <- Artes_token %>% inner_join(lexico)
+
+Artes_nrc %>%
+  filter(sentiment!="negative" & sentiment!="positive") %>%
+  count(word,sentiment,sort=TRUE) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label=n), hjust= 0) +
+  facet_wrap(~sentiment,scales = "free_y")+
+  coord_flip() +
+  xlab(NULL)
+
+
+
+Artes_nrc %>%
+  filter(sentiment=="negative" | sentiment=="positive") %>%
+  count(word,sentiment,sort=TRUE) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label=n), hjust= 0) +
+  facet_wrap(~sentiment,scales = "free_y")+
+  coord_flip() +
+  xlab(NULL)
+
+
+Artes_nrc %>%
+         count(sentiment, sort = TRUE) %>%
+         ggplot(aes(x = sentiment, y = n, fill = sentiment)) +
+         geom_col() +
+         theme(legend.position = "none") +
+         #geom_text(aes(label = n, y = n, x = screen_name),hjust=0, size = 3, color = "black")+
+         labs(x = "Sentimiento", y = "Frecuencia de Palabras")
+
+```
+
+
+
+## EleccionesChile2021
+```{r echo=TRUE}
+
+df_Hashtag <- df_Hashtag %>% filter(lang != "en")
+Hashtag_token <- unnest_tokens(tbl=df_Hashtag, output="word",input="text",token="words")
+Hashtag_token <- anti_join(x=Hashtag_token,y=tibble(word = tm::stopwords("es")),by="word")
+Hashtag_token %>%
+  count(word) %>%
+  with(wordcloud(words=word, freq=n, max.words = 80, random.order = F, colors=brewer.pal(8,"Dark2")))
+
+
+Hashtag_nrc <- Hashtag_token %>% inner_join(lexico)
+
+Hashtag_nrc %>%
+  filter(sentiment!="negative" & sentiment!="positive") %>%
+  count(word,sentiment,sort=TRUE) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label=n), hjust= 0) +
+  facet_wrap(~sentiment,scales = "free_y")+
+  coord_flip() +
+  xlab(NULL)
+
+
+Hashtag_nrc %>%
+  filter(sentiment=="negative" | sentiment=="positive") %>%
+  count(word,sentiment,sort=TRUE) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label=n), hjust= 0) +
+  facet_wrap(~sentiment,scales = "free_y")+
+  coord_flip() +
+  xlab(NULL)
+
+
+Hashtag_nrc %>%
+        count(sentiment, sort = TRUE) %>%
+        ggplot(aes(x = sentiment, y = n, fill = sentiment)) +
+        geom_col() +
+        theme(legend.position = "none") +
+        #geom_text(aes(label = n, y = n, x = screen_name),hjust=0, size = 3, color = "black")+
+        labs(x = "Sentimiento", y = "Frecuencia de Palabras")
+
+```
+
+
+
+
+
+
+

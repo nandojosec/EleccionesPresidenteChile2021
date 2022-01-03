@@ -1,0 +1,163 @@
+---
+title: "Código TFM"
+author: "José Fernando Castillo Alba"
+date: "Noviembre/2021"
+output: 
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r echo=TRUE}
+library(rtweet)
+library(dplyr)
+library(tidyr)
+
+```
+
+# Autenticación API Twitter
+
+
+```{r echo=TRUE}
+appname <- "AnalisisSentimientos_UOC"
+consumer_key <- "z84BA0fubPHp0d6r6tAhc5c9g"
+consumer_secret <- "nWm85JbhrEACKzcXbBDqMe0F02mml1s6wZ2x72bx7gtbaV8tCE"
+access_token <- "128280569-kfGElrOpL3z51tdzhRmSDbAR6CuvQvhkDvcs3ioW"
+access_secret <- "Pn4GCuGS8W3kRxgbNcKIdZvN95UF8utcfTnTet48k4KD4"
+
+token <- create_token(app = appname,
+  consumer_key = consumer_key,
+  consumer_secret = consumer_secret,
+  access_token = access_token, 
+  access_secret = access_secret)
+```
+
+#Tweet dirigidos a GABRIEL BORIC FONT @gabrielboric #Candidato Presidencial
+```{r echo=TRUE}
+tweetsBoric <- search_tweets("@gabrielboric", 
+                              n = 200000,
+                              include_rts = TRUE,
+                              retryonratelimit = TRUE,
+                              since = '2021-11-17',
+                              until = '2021-11-20'
+                        )
+save_as_csv(tweetsBoric, "tweetsBoric.csv")
+users_data(tweetsBoric) %>% head()
+
+```
+
+
+#Tweet dirigidos a YASNA PROVOSTE @ProvosteYasna #Candidata Presidencial
+```{r echo=TRUE}
+tweetsProvoste <- search_tweets("@ProvosteYasna", 
+                        n = 200000,
+                        include_rts = TRUE,
+                        retryonratelimit = TRUE,
+                        since = '2021-11-17',
+                        until = '2021-11-20'
+                        )
+save_as_csv(tweetsProvoste, "tweetsProvoste.csv")
+users_data(tweetsProvoste) %>% head()
+
+```
+
+#Tweet dirigidos a SEBASTIAN SICHEL @sebastiansichel #Candidato Presidencial
+```{r echo=TRUE}
+tweetsSichel <- search_tweets("@sebastiansichel", 
+                        n = 200000,
+                        include_rts = TRUE,
+                        retryonratelimit = TRUE,
+                        since = '2021-11-17',
+                        until = '2021-11-20'
+                        )
+save_as_csv(tweetsSichel, "tweetsSichel.csv")
+users_data(tweetsProvoste) %>% head()
+
+```
+
+
+
+#Tweet dirigidos a JOSE ANTONIO KAST @joseantoniokast #Candidato Presidencial
+```{r echo=TRUE}
+tweetsKast <- search_tweets("@joseantoniokast", 
+                        n = 200000,
+                        include_rts = TRUE,
+                        retryonratelimit = TRUE,
+                        since = '2021-11-17',
+                        until = '2021-11-20'
+                        )
+save_as_csv(tweetsKast, "tweetsKast.csv")
+
+```
+
+
+#Tweet dirigidos a MARCO ENRIQUEZ-OMINAMI @marcoporchile #Candidato Presidencial
+```{r echo=TRUE}
+tweetsEnriquez <- search_tweets("@marcoporchile", 
+                        n = 200000,
+                        include_rts = TRUE,
+                        retryonratelimit = TRUE,
+                        since = '2021-11-17',
+                        until = '2021-11-20'
+                        )
+save_as_csv(tweetsEnriquez, "tweetsEnriquez.csv")
+
+```
+
+
+#Tweet dirigidos a FRANCO PARISI @Parisi_oficial #Candidato Presidencial
+```{r echo=TRUE}
+tweetsParisi <- search_tweets("@Parisi_oficial", 
+                        n = 200000,
+                        include_rts = TRUE,
+                        retryonratelimit = TRUE,
+                        since = '2021-11-17',
+                        until = '2021-11-20'
+                        )
+save_as_csv(tweetsParisi, "tweetsParisi.csv")
+
+```
+
+
+#Tweet dirigidos a EDUARDO ARTÉS @artes_oficial #Candidato Presidencial
+```{r echo=TRUE}
+tweetsArtes <- search_tweets("@artes_oficial", 
+                        n = 200000,
+                        include_rts = TRUE,
+                        retryonratelimit = TRUE,
+                        since = '2021-11-17',
+                        until = '2021-11-20'
+                        )
+save_as_csv(tweetsArtes, "tweetsArtes.csv")
+
+```
+
+
+#Tweet con un HASHTAG RELEVANTE haciendo referencia a las elecciones
+```{r echo=TRUE}
+tweetsHashtag <- search_tweets("#EleccionesChile2021", 
+                        n = 200000,
+                        include_rts = TRUE,
+                        retryonratelimit = TRUE,
+                        since = '2021-11-17',
+                        until = '2021-11-20'
+                        )
+save_as_csv(tweetsHashtag, "tweetsHashtag.csv")
+users_data(tweetsHashtag) %>% head()
+
+```
+
+
+

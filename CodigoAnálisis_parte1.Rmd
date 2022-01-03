@@ -1,0 +1,1029 @@
+---
+title: "Código TFM"
+author: "José Fernando Castillo Alba"
+date: "Noviembre/2021"
+output: 
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r echo=TRUE}
+library(rtweet)
+library(dplyr)
+library(tidyr)
+
+```
+
+# Análisis de los DATASET
+
+## Cargar los DATASET
+```{r echo=TRUE}
+df_Provoste <- read.csv('tweetsProvoste.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Sichel <- read.csv('tweetsSichel.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Parisi <- read.csv('tweetsParisi.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Kast <- read.csv('tweetsKast.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Enriquez <- read.csv('tweetsEnriquez.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Boric <- read.csv('tweetsBoric.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Artes <- read.csv('tweetsArtes.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+df_Hashtag <- read.csv('tweetsHashtag.csv',header=T, encoding = "UTF-8", sep=",", stringsAsFactors = FALSE)
+#class(df_Provoste)
+#names(df_Provoste)
+#users_data(df_Provoste) %>% head()
+#head(df_Provoste$text, 5)
+```
+
+
+## Nro. total de Tweets capturados
+```{r echo=TRUE}
+library(ggplot2)
+
+Candidatos <- c("@ProvosteYasna","@gabrielboric","@sebastiansichel","@joseantoniokast","@marcoporchile","@Parisi_oficial","@artes_oficial","#EleccionesChile2021")
+Total_tweets <- c(nrow(df_Provoste),nrow(df_Boric),nrow(df_Sichel),nrow(df_Kast),nrow(df_Enriquez),nrow(df_Parisi),nrow(df_Artes),nrow(df_Hashtag))
+resultados <- data.frame(Candidatos=Candidatos,Total_tweets=Total_tweets)
+
+head(resultados,8)
+
+ggplot(resultados,aes(x = reorder(Candidatos,Total_tweets), y = Total_tweets, fill = Candidatos)) + geom_col() +
+    theme(legend.position = "none") +
+    geom_text(aes(label = Total_tweets, y = Total_tweets, x = Candidatos),hjust=1, size = 3, color = "black")+
+    coord_flip() +
+    labs(title = "Cantidad de Tweets capturados", x = NULL, y = "Número de Tweets")
+
+```
+
+
+## Clasificación en Tweets y RTweets
+```{r echo=TRUE}
+library(ggplot2)
+library(gridExtra)
+
+#Función para convertir a factor la variable is_retweet
+conv_factor <- function(datos) {
+resultado <- factor(datos$is_retweet,labels=c("Tweets","RTweets")) #Convertir a factor
+return(resultado)
+}
+
+clasificacion1 <- conv_factor(df_Provoste)
+clasificacion2 <- conv_factor(df_Sichel)
+clasificacion3 <- conv_factor(df_Parisi)
+clasificacion4 <- conv_factor(df_Kast)
+clasificacion5 <- conv_factor(df_Enriquez)
+clasificacion6 <- conv_factor(df_Boric)
+clasificacion7 <- conv_factor(df_Artes)
+clasificacion8 <- conv_factor(df_Hashtag)
+
+
+g1 <- ggplot(df_Provoste,aes(x=clasificacion1,fill=clasificacion1))+geom_bar()+ labs(title="Yasna Provoste", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=1, size=3) +
+    theme(legend.position = "none")
+
+g2 <- ggplot(df_Sichel,aes(x=clasificacion2,fill=clasificacion2))+geom_bar()+ labs(title="Sebastián Sichel", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=1, size=3)+
+    theme(legend.position = "none")
+
+g3 <- ggplot(df_Parisi,aes(x=clasificacion3,fill=clasificacion3))+geom_bar()+ labs(title="Franco Parisi", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=1, size=3)+
+    theme(legend.position = "none") 
+
+g4 <- ggplot(df_Kast,aes(x=clasificacion4,fill=clasificacion4))+geom_bar()+ labs(title="José Antonio Kast", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=1, size=3)+
+    theme(legend.position = "none") 
+
+g5 <- ggplot(df_Enriquez,aes(x=clasificacion5,fill=clasificacion5))+geom_bar()+ labs(title="Marco Enríquez-Ominami", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=1, size=3)+
+    theme(legend.position = "none")
+
+g6 <- ggplot(df_Boric,aes(x=clasificacion6,fill=clasificacion6))+geom_bar()+ labs(title="Gabriel Boric", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=1, size=3)+
+    theme(legend.position = "none") 
+
+g7 <- ggplot(df_Artes,aes(x=clasificacion7,fill=clasificacion7))+geom_bar()+ labs(title="Eduardo Artés", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=1, size=3)+
+    theme(legend.position = "none") 
+
+g8 <- ggplot(df_Hashtag,aes(x=clasificacion8,fill=clasificacion8))+geom_bar()+ labs(title="#EleccionesChile2021", x=NULL, y=NULL)+geom_text(stat='count',aes(label=..count..), vjust=1, size=3)+
+    theme(legend.position = "none")
+
+grid.arrange(g1,g2,g3,g4,g5, g6,g7,g8,nrow=3)
+grid.arrange(g5,g6,g7,g8,ncol=2)
+
+```
+
+## Evolución temporal de los tweets
+```{r echo=TRUE}
+t1 <- ts_plot(df_Provoste, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "Yasna Provoste") + theme_minimal()
+
+t2 <- ts_plot(df_Sichel, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "Sebastián Sichel") + theme_minimal()
+
+t3 <- ts_plot(df_Parisi, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "Franco Parisi") + theme_minimal()
+
+t4 <- ts_plot(df_Kast, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "José Antonio Kast") + theme_minimal()
+
+t5 <- ts_plot(df_Enriquez, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "Marco Enríquez-Ominami") + theme_minimal()
+
+t6 <- ts_plot(df_Boric, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "Gabriel Boric") + theme_minimal()
+
+t7 <- ts_plot(df_Artes, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "Eduardo Artés") + theme_minimal()
+
+t8 <- ts_plot(df_Hashtag, "hours") + labs(y = "Número de tweets", x = "Evolución en el Tiempo", title = "#EleccionesChile2021") + theme_minimal()
+
+grid.arrange(t1,t2,t3,t4,t5,t6,t7,t8,nrow=3)
+grid.arrange(t5,t6,t7,t8,ncol=2)
+```
+
+## Usuario que recibio mas RTweets en un Tweet 
+
+### Mencionando a Yasna Provoste 
+```{r echo=TRUE}
+library(kableExtra)
+
+    df_Provoste %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>%
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    kbl(caption = "Top 5 de Perfiles con mas RTweets en un Tweet - @ProvosteYasna", position = "center") %>%
+    kable_classic(full_width = F, html_font = "Cambria")%>%
+    column_spec(column = 2, width = "7cm")
+
+    df_Provoste %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>% 
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    ggplot(aes(x = reorder(retweet_screen_name, retweet_count), y = retweet_count, fill = retweet_screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    #geom_text(aes(label = retweet_count, y = retweet_count, x = retweet_screen_name),hjust=0, size = 3, color = "red")+
+    coord_flip() +
+    labs(title = "Top 5 de Perfiles con más RTweets en un Tweet - @ProvosteYasna", x = NULL, y = "Número de RT")
+
+```
+
+### Mencionando a Sebastián Sichel
+
+```{r echo=TRUE}
+
+df_Sichel %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>%
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    kbl(caption = "Top 5 de Perfiles con mas RTweets en un Tweet - @sebastiansichel", position = "center") %>%
+    kable_classic(full_width = F, html_font = "Cambria")%>%
+    column_spec(column = 2, width = "7cm")
+
+
+df_Sichel %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>% 
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    ggplot(aes(x = reorder(retweet_screen_name, retweet_count), y = retweet_count, fill = retweet_screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    #geom_text(aes(label = retweet_count, y = retweet_count, x = retweet_screen_name),hjust=0, size = 3, color = "red")+
+    coord_flip() +
+    labs(title = "Top 5 de Perfiles con mas RTweets en un Tweet - @sebastiansichel", x = NULL, y = "Número de RT")
+
+```
+
+### Mencionando a Franco Parisi
+```{r echo=TRUE}
+
+df_Parisi %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count) %>%
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    kbl(caption = "Top 5 de Perfiles con mas RTweets en un Tweet - @Parisi_oficial", position = "center") %>%
+    kable_classic(full_width = F, html_font = "Cambria")%>%
+    column_spec(column = 2, width = "7cm")
+
+  
+df_Parisi %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>% 
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    ggplot(aes(x = reorder(retweet_screen_name, retweet_count), y = retweet_count, fill = retweet_screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    #geom_text(aes(label = retweet_count, y = retweet_count, x = retweet_screen_name),hjust=0, size = 3, color = "red")+
+    coord_flip() +
+    labs(title = "Top 5 de Perfiles con mas RTweets en un Tweet - @Parisi_oficial", x = NULL, y = "Número de RT")
+
+```
+
+### Mencionando a José Antonio Kast
+```{r echo=TRUE}
+df_Kast %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>%
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    kbl(caption = "Top 5 de Perfiles con mas RTweets en un Tweet - @joseantoniokast", position = "center") %>%
+    kable_classic(full_width = F, html_font = "Cambria")%>%
+    column_spec(column = 2, width = "7cm")
+
+
+
+df_Kast %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>% 
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    ggplot(aes(x = reorder(retweet_screen_name, retweet_count), y = retweet_count, fill = retweet_screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    #geom_text(aes(label = retweet_count, y = retweet_count, x = retweet_screen_name),hjust=0, size = 3, color = "red")+
+    coord_flip() +
+    labs(title = "Top 5 de Perfiles con mas RTweets en un Tweet - @joseantoniokast", x = NULL, y = "Número de RT")
+
+```
+
+
+### Mencionando a Marco Enríquez-Ominami
+```{r echo=TRUE}
+df_Enriquez %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>%
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    kbl(caption = "Top 5 de Perfiles con mas RTweets en un Tweet - @marcoporchile", position = "center") %>%
+    kable_classic(full_width = F, html_font = "Cambria")%>%
+    column_spec(column = 2, width = "7cm")
+
+
+
+df_Enriquez %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>% 
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    ggplot(aes(x = reorder(retweet_screen_name, retweet_count), y = retweet_count, fill = retweet_screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    #geom_text(aes(label = retweet_count, y = retweet_count, x = retweet_screen_name),hjust=0, size = 3, color = "red")+
+    coord_flip() +
+    labs(title = "Top 5 de Perfiles con mas RTweets en un Tweet - @marcoporchile", x = NULL, y = "Número de RT")
+
+```
+
+### Mencionando a Gabriel Boric
+```{r echo=TRUE}
+df_Boric %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>%
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    kbl(caption = "Top 5 de Perfiles con mas RTweets en un Tweet - @gabrielboric", position = "center") %>%
+    kable_classic(full_width = F, html_font = "Cambria")%>%
+    column_spec(column = 2, width = "7cm")
+
+
+
+
+df_Boric %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>% 
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    ggplot(aes(x = reorder(retweet_screen_name, retweet_count), y = retweet_count, fill = retweet_screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    #geom_text(aes(label = retweet_count, y = retweet_count, x = retweet_screen_name),hjust=0, size = 3, color = "red")+
+    coord_flip() +
+    labs(title = "Top 5 de Perfiles con mas RTweets en un Tweet - @gabrielboric", x = NULL, y = "Número de RT")
+
+```
+
+
+### Mencionando a Eduardo Artés
+```{r echo=TRUE}
+df_Artes %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>%
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    kbl(caption = "Top 5 de Perfiles con mas RTweets en un Tweet - @artes_oficial", position = "center") %>%
+    kable_classic(full_width = F, html_font = "Cambria")%>%
+    column_spec(column = 2, width = "7cm")
+
+
+
+df_Artes %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>% 
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    ggplot(aes(x = reorder(retweet_screen_name, retweet_count), y = retweet_count, fill = retweet_screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    #geom_text(aes(label = retweet_count, y = retweet_count, x = retweet_screen_name),hjust=0, size = 3, color = "red")+
+    coord_flip() +
+    labs(title = "Top 5 de Perfiles con mas RTweets en un Tweet - @artes_oficial", x = NULL, y = "Número de RT")
+
+```
+
+
+
+### Hashtag #EleccionesChile2021
+```{r echo=TRUE}
+df_Hashtag %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    filter(retweet_screen_name!="")%>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>%
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    kbl(caption = "Top 5 de Perfiles con mas RTweets en un Tweet - #EleccionesChile2021", position = "center") %>%
+    kable_classic(full_width = F, html_font = "Cambria")%>%
+    column_spec(column = 2, width = "7cm")
+
+
+
+df_Hashtag %>% 
+    distinct(retweet_screen_name, retweet_count) %>%
+    filter(retweet_screen_name!="")%>%
+    top_n(5, retweet_count) %>% 
+    arrange(desc(retweet_count)) %>% 
+    select(retweet_screen_name, retweet_count)%>% 
+    mutate(retweet_screen_name = paste0("@", retweet_screen_name)) %>%
+    ggplot(aes(x = reorder(retweet_screen_name, retweet_count), y = retweet_count, fill = retweet_screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    #geom_text(aes(label = retweet_count, y = retweet_count, x = retweet_screen_name),hjust=0, size = 3, color = "red")+
+    coord_flip() +
+    labs(title = "Top 5 de Perfiles con mas RTweets en un Tweet - #EleccionesChile2021", x = NULL, y = "Número de RT")
+
+```
+
+
+
+
+
+## Usuarios mas activos incluye los RT
+
+### Yasna Provoste 
+```{r echo=TRUE}
+df_Provoste %>% 
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuarios mas activos incluye el RT", x = NULL, y = "Número de Tweets")
+```
+
+
+### Sebastián Sichel
+```{r echo=TRUE}
+df_Sichel %>% 
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuarios mas activos incluye el RT", x = NULL, y = "Número de Tweets")
+```
+
+
+### Franco Parisi
+```{r echo=TRUE}
+df_Parisi %>% 
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos incluye el RT", x = NULL, y = "Número de Tweets")
+```
+
+
+### José Antonio Kast
+```{r echo=TRUE}
+df_Kast %>% 
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos incluye el RT", x = NULL, y = "Número de Tweets")
+```
+
+
+### Marco Enríquez-Ominami
+```{r echo=TRUE}
+df_Enriquez %>% 
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos incluye el RT", x = NULL, y = "Número de Tweets")
+```
+
+
+### Gabriel Boric
+```{r echo=TRUE}
+df_Boric %>% 
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos incluye el RT", x = NULL, y = "Número de Tweets")
+```
+
+### Eduardo Artes
+```{r echo=TRUE}
+df_Artes %>% 
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos incluye el RT", x = NULL, y = "Número de Tweets")
+```
+
+
+
+
+## Usuarios mas activos sin incluir el RT
+
+### Yasna Provoste
+```{r echo=TRUE}
+
+df_Provoste %>%  
+        filter(is_retweet==F) %>%
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos sin incluir los RT", x = NULL, y = "Número de tweets")
+```
+
+
+### Sebastián Sichel
+```{r echo=TRUE}
+
+df_Sichel %>%  
+        filter(is_retweet==F) %>%
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos sin incluir los RT", x = NULL, y = "Número de Tweets")
+```
+
+
+### Franco Parisi
+```{r echo=TRUE}
+
+df_Parisi %>%  
+        filter(is_retweet==F) %>%
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos sin incluir los RT", x = NULL, y = "Número de Tweets")
+```
+
+
+### José Antonio Kast
+```{r echo=TRUE}
+
+df_Kast %>%  
+        filter(is_retweet==F) %>%
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos sin incluir los RT", x = NULL, y = "Número de Tweets")
+```
+
+
+### Marco Enríquez-Ominami
+```{r echo=TRUE}
+
+df_Enriquez %>%  
+        filter(is_retweet==F) %>%
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos sin incluir los RT", x = NULL, y = "Número de Tweets")
+```
+
+
+### Gabriel Boric
+```{r echo=TRUE}
+
+df_Boric %>%  
+        filter(is_retweet==F) %>%
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos sin incluir los RT", x = NULL, y = "Número de Tweets")
+```
+
+
+### Eduardo Artes
+```{r echo=TRUE}
+
+df_Artes %>%  
+        filter(is_retweet==F) %>%
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos sin incluir los RT", x = NULL, y = "Número de Tweets")
+```
+
+
+### #EleccionesChile2021
+```{r echo=TRUE}
+
+df_Hashtag %>%  
+        filter(is_retweet==F) %>%
+        count(screen_name, sort = TRUE) %>%
+        top_n(5,n) %>%
+        mutate(screen_name = paste0("@", screen_name)) %>%
+        ggplot(aes(x = reorder(screen_name,n), y = n, fill = screen_name)) +
+        geom_col() +
+        coord_flip()+
+        theme(legend.position = "none") +
+        geom_text(aes(label = n, y = n, x = screen_name),hjust=1.2, size = 4, color = "black")+
+        labs(title = "Usuario mas activos sin incluir los RT", x = NULL, y = "Número de Tweets")
+```
+
+
+## Usuarios con mas Seguidores
+
+### Yasna Provoste
+```{r echo=TRUE}
+df_Provoste %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  filter(followers_count != 3875722 & followers_count != 3533138 & followers_count != 3118194 )%>% 
+  top_n(5,followers_count) %>%
+  select(screen_name,followers_count) %>%
+  mutate(screen_name = paste0("@", screen_name)) %>%
+    ggplot(aes(x = reorder(screen_name, followers_count), y = followers_count, fill = screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    geom_text(aes(label = followers_count, y = followers_count, x = screen_name),hjust=1.2, size = 3, color = "black")+
+    coord_flip() +
+    labs(title = "Usuarios con más seguidores", x = NULL, y = "Número de seguidores")
+ 
+```
+
+### Sebastián Sichel
+```{r echo=TRUE}
+
+df_Sichel %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  top_n(5,followers_count) %>%
+  select(screen_name,followers_count)
+
+
+df_Sichel %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  filter(followers_count != 3875751)%>% 
+  top_n(5,followers_count) %>%
+  select(screen_name,followers_count) %>%
+  mutate(screen_name = paste0("@", screen_name)) %>%
+    ggplot(aes(x = reorder(screen_name, followers_count), y = followers_count, fill = screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    geom_text(aes(label = followers_count, y = followers_count, x = screen_name),hjust=1.2, size = 3, color = "black")+
+    coord_flip() +
+    labs(title = "Usuarios con más seguidores", x = NULL, y = "Número de seguidores")
+ 
+```
+
+### Franco Parisi
+```{r echo=TRUE}
+df_Parisi %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  top_n(5,followers_count) %>%
+  select(screen_name,followers_count)
+
+
+df_Parisi %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  filter(followers_count != 258678)%>%
+  top_n(5,followers_count) %>%
+  select(screen_name,followers_count) %>%
+  mutate(screen_name = paste0("@", screen_name)) %>%
+    ggplot(aes(x = reorder(screen_name, followers_count), y = followers_count, fill = screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    geom_text(aes(label = followers_count, y = followers_count, x = screen_name),hjust=1.2, size = 3, color = "black")+
+    coord_flip() +
+    labs(title = "Usuarios con más seguidores", x = NULL, y = "Número de seguidores")
+ 
+```
+
+### José Antonio Kast
+```{r echo=TRUE}
+df_Kast %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  top_n(5,followers_count) %>%
+  select(screen_name,followers_count)
+
+
+df_Kast %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  top_n(5,followers_count) %>%
+  select(screen_name,followers_count) %>%
+  mutate(screen_name = paste0("@", screen_name)) %>%
+    ggplot(aes(x = reorder(screen_name, followers_count), y = followers_count, fill = screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    geom_text(aes(label = followers_count, y = followers_count, x = screen_name),hjust=1.2, size = 3, color = "black")+
+    coord_flip() +
+    labs(title = "Usuarios con más seguidores", x = NULL, y = "Número de seguidores")
+ 
+```
+
+### Marco Enríquez-Ominami
+```{r echo=TRUE}
+df_Enriquez %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  top_n(10,followers_count) %>%
+  select(screen_name,followers_count)
+
+df_Enriquez %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  filter(followers_count != 3875828 & followers_count != 752423)%>%
+  top_n(5,followers_count) %>%
+  select(screen_name,followers_count) %>%
+  mutate(screen_name = paste0("@", screen_name)) %>%
+    ggplot(aes(x = reorder(screen_name, followers_count), y = followers_count, fill = screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    geom_text(aes(label = followers_count, y = followers_count, x = screen_name),hjust=1.2, size = 3, color = "black")+
+    coord_flip() +
+    labs(title = "Usuarios con más seguidores", x = NULL, y = "Número de seguidores")
+ 
+```
+
+### Gabriel Boric
+```{r echo=TRUE}
+df_Boric %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  top_n(5,followers_count) %>%
+  select(screen_name,followers_count)
+
+df_Boric %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  filter(followers_count != 3875626 & followers_count != 1846252)%>%
+  top_n(5,followers_count) %>%
+  select(screen_name,followers_count) %>%
+  mutate(screen_name = paste0("@", screen_name)) %>%
+    ggplot(aes(x = reorder(screen_name, followers_count), y = followers_count, fill = screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    geom_text(aes(label = followers_count, y = followers_count, x = screen_name),hjust=1.2, size = 3, color = "black")+
+    coord_flip() +
+    labs(title = "Usuarios con más seguidores", x = NULL, y = "Número de seguidores")
+ 
+```
+
+### Eduardo Artes
+```{r echo=TRUE}
+df_Artes %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  top_n(5,followers_count) %>%
+  select(screen_name,followers_count)
+
+
+df_Artes %>% 
+  distinct(screen_name,followers_count) %>%
+  arrange(desc(followers_count))%>%
+  filter(followers_count != 3875834)%>%
+  top_n(5,followers_count) %>%
+  select(screen_name,followers_count) %>%
+  mutate(screen_name = paste0("@", screen_name)) %>%
+    ggplot(aes(x = reorder(screen_name, followers_count), y = followers_count, fill = screen_name)) +
+    geom_col() +
+    theme(legend.position = "none") +
+    geom_text(aes(label = followers_count, y = followers_count, x = screen_name),hjust=1.2, size = 3, color = "black")+
+    coord_flip() +
+    labs(title = "Usuarios con más seguidores", x = NULL, y = "Número de seguidores")
+ 
+```
+
+
+## Procedencia de los Tweets
+
+### Yasna Provoste
+
+```{r echo=TRUE}
+df_Provoste %>%
+    filter(location != "", !is.na(location)) %>% 
+    count(location) %>% 
+  top_n(10) %>% 
+    ggplot() +
+      geom_col(aes(x = reorder(location, n), y = n)) + 
+      coord_flip() +
+      labs(title = "Procedencia de los usuarios",
+           x = "ubicación",
+           y = "cantidad")
+
+```
+
+
+### Sebastián Sichel
+```{r echo=TRUE}
+df_Sichel %>%
+    filter(location != "", !is.na(location)) %>% 
+    count(location) %>% 
+  top_n(10) %>% 
+    ggplot() +
+      geom_col(aes(x = reorder(location, n), y = n)) + 
+      coord_flip() +
+      labs(title = "Procedencia de los usuarios",
+           x = "ubicación",
+           y = "cantidad")
+
+```
+
+#Franco Parisi
+```{r echo=TRUE}
+df_Parisi %>%
+    filter(location != "", !is.na(location)) %>% 
+    count(location) %>% 
+  top_n(10) %>% 
+    ggplot() +
+      geom_col(aes(x = reorder(location, n), y = n)) + 
+      coord_flip() +
+      labs(title = "Procedencia de los usuarios",
+           x = "ubicación",
+           y = "cantidad")
+
+```
+
+### José Antonio Kast
+```{r echo=TRUE}
+df_Kast %>%
+    filter(location != "", !is.na(location)) %>% 
+    count(location) %>% 
+  top_n(10) %>% 
+    ggplot() +
+      geom_col(aes(x = reorder(location, n), y = n)) + 
+      coord_flip() +
+      labs(title = "Procedencia de los usuarios",
+           x = "ubicación",
+           y = "cantidad")
+
+```
+ 
+ 
+### Marco Enríquez-Ominami
+```{r echo=TRUE}
+df_Enriquez %>%
+    filter(location != "", !is.na(location)) %>% 
+    count(location) %>% 
+  top_n(10) %>% 
+    ggplot() +
+      geom_col(aes(x = reorder(location, n), y = n)) + 
+      coord_flip() +
+      labs(title = "Procedencia de los usuarios",
+           x = "ubicación",
+           y = "cantidad")
+
+```
+
+
+### Gabriel Boric
+```{r echo=TRUE}
+df_Boric %>%
+    filter(location != "", !is.na(location)) %>% 
+    count(location) %>% 
+  top_n(10) %>% 
+    ggplot() +
+      geom_col(aes(x = reorder(location, n), y = n)) + 
+      coord_flip() +
+      labs(title = "Procedencia de los usuarios",
+           x = "ubicación",
+           y = "cantidad")
+
+```
+
+
+### Eduardo Artes
+```{r echo=TRUE}
+df_Artes %>%
+    filter(location != "", !is.na(location)) %>% 
+    count(location) %>% 
+  top_n(10) %>% 
+    ggplot() +
+      geom_col(aes(x = reorder(location, n), y = n)) + 
+      coord_flip() +
+      labs(title = "Procedencia de los usuarios",
+           x = "ubicación",
+           y = "cantidad")
+
+```
+
+#Yasna Provoste
+#Sebastián Sichel
+#Franco Parisi
+#José Antonio Kast
+#Marco Enríquez-Ominami
+#Gabriel Boric
+#Eduardo Artes
+
+
+## Comunidades Virtuales 
+
+```{r echo=TRUE}
+comunidades <- df_Parisi[, c("screen_name" , "retweet_screen_name" )]
+cm_complete <- comunidades %>% mutate_all(na_if,"")
+cm_complete <- cm_complete[complete.cases(cm_complete), ]
+#colnames(cm_complete) <- c("Source","Target" )
+#write.csv(cm_complete, file="Boric3.csv", row.names=FALSE)
+cm_matrx <- as.matrix(cm_complete)
+
+library(igraph)
+
+cm_rt <- graph_from_edgelist(el = cm_matrx, directed = TRUE)
+cm_rt
+
+V(cm_rt)
+vcount(cm_rt)
+ecount(cm_rt)
+
+V(cm_rt)$id <- 1:vcount(cm_rt)
+
+
+sg_nw_rt_df <- as_data_frame(cm_rt, what = "both")
+sg_nodes <- sg_nw_rt_df$vertices
+sg_ties <- sg_nw_rt_df$edges
+
+
+out_degree <- degree(cm_rt, mode = c("out"))
+out_degree_sort <- sort(out_degree, decreasing = TRUE)
+out_degree_sort[1:10]
+
+
+in_degree <- degree(cm_rt, mode = c("in"))
+in_degree_sort <- sort(in_degree, decreasing = TRUE)
+in_degree_sort[1:10]
+
+
+# betwn_nw <- betweenness(cm_rt, directed = TRUE)
+# betwn_nw_sort <- betwn_nw %>%
+#   sort(decreasing = TRUE) %>%
+#   round()
+# betwn_nw_sort[1:10]
+# 
+# 
+# sg_nodes_scores <- sg_nodes %>%
+#   mutate(out_degree = out_degree) %>%
+#   mutate(in_degree = in_degree) %>% 
+#   mutate(betweenness = betwn_nw)
+# 
+# 
+# library(ggraph)
+# library(graphlayouts)
+# 
+# 
+# sg_ego <- ego(cm_rt, order = 10)
+# sg_sel <- induced_subgraph(cm_rt, unlist(sg_ego))
+# V(sg_sel)$betweenness <- betweenness(sg_sel)
+# 
+# names(sg_sel)
+# 
+# library(visNetwork) 
+
+# visdata <- toVisNetworkData(sg_sel)
+# nodes <- visdata$nodes
+# edges <- visdata$edges
+# nodes$size <- nodes$betweenness
+# visNetwork(nodes = nodes, edges = edges)%>%
+#visNodes(label = id) %>%
+#visEdges(arrows = c('to,from'), smooth = TRUE) %>%
+#visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+
+
+
+prep_for_gephi <- function(edge_file_name, nodes_file_name,df) {
+
+df_1 <- as.data.frame(df)
+colnames(df_1)[1:2] <- c("Source","Target")
+write.csv(df_1, file=paste(edge_file_name,".csv", sep = ""), row.names=FALSE)
+
+# make nodes
+df_1$Source <- as.character(df_1$Source)
+df_1$Target <- as.character(df_1$Target)
+nodes <- c(df_1$Source, df_1$Target)
+nodes <- as.data.frame(nodes, stringsAsFactors = F)
+nodes <- unique(nodes)
+
+# gephi also requires Ids and labels that are the same as the node names
+nodes$Id <- nodes$nodes
+nodes$Label <- nodes$nodes
+
+# Adding in the extra columns to the nodes data frame
+df_1_join <- df_1
+
+df_1_join <- df_1[!duplicated(df_1$Source),]
+nodes$Source <- nodes$Id
+nodes <- as.data.frame(nodes, stringsAsFactors = F)
+nodes <- left_join(nodes, df_1_join, by = "Source")
+nodes$Source <- NULL; nodes$Target <- NULL
+
+write.csv(nodes, file=paste(nodes_file_name,".csv", sep = ""), row.names=FALSE)
+}
+
+## Create the csv files
+prep_for_gephi("retweet_edgesParisi","retweet_nodesParisi",cm_matrx)
+
+```
+
+
